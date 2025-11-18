@@ -12,9 +12,7 @@ Model name is converted to lowercase for the collection name:
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
-
-# Example schemas (replace with your own):
+from typing import Optional, List
 
 class User(BaseModel):
     """
@@ -27,19 +25,35 @@ class User(BaseModel):
     age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
     is_active: bool = Field(True, description="Whether user is active")
 
-class Product(BaseModel):
+class Riceproduct(BaseModel):
     """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
+    Rice products collection schema
+    Collection name: "riceproduct"
     """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
+    name: str = Field(..., description="Rice variety name")
+    description: Optional[str] = Field(None, description="Short description")
+    price_per_kg: float = Field(..., ge=0, description="Price per kilogram")
+    origin: Optional[str] = Field(None, description="Origin region/country")
+    stock_kg: float = Field(0, ge=0, description="Available stock in kg")
+    image: Optional[str] = Field(None, description="Image URL")
 
-# Add your own schemas here:
-# --------------------------------------------------
+class OrderItem(BaseModel):
+    product_id: str = Field(..., description="Referenced riceproduct _id as string")
+    name: str = Field(..., description="Product name snapshot")
+    price_per_kg: float = Field(..., ge=0, description="Price per kg at time of order")
+    quantity_kg: float = Field(..., gt=0, description="Quantity in kg")
+
+class Order(BaseModel):
+    """
+    Orders collection schema
+    Collection name: "order"
+    """
+    customer_name: str = Field(..., description="Customer full name")
+    phone: str = Field(..., description="Contact phone number")
+    address: str = Field(..., description="Delivery address")
+    notes: Optional[str] = Field(None, description="Additional notes")
+    items: List[OrderItem] = Field(..., description="List of ordered items")
+    total_amount: float = Field(..., ge=0, description="Computed total amount")
 
 # Note: The Flames database viewer will automatically:
 # 1. Read these schemas from GET /schema endpoint
